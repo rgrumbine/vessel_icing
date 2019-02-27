@@ -1,0 +1,30 @@
+#BSUB -J %E%sice_%CYC%
+#BSUB -o /com/output/%ENVIR%/today/sice_%CYC%.o%J
+#BSUB -L /bin/sh
+#BSUB -q prod_serv2
+#BSUB -W 00:30
+#BSUB -cwd /tmpnwprd
+#BSUB -P %PROJ%-%PROJENVIR%
+#BSUB -R rusage[mem=500]
+#BSUB -R affinity[core]
+
+%include <head.h>
+%include <envir-p1.h>
+
+export cyc=%CYC%
+
+model=vessel_icing
+%include <model_ver.h>
+
+$HOMEvessel_icing/jobs/JSICE
+
+%include <tail.h>
+
+%manual
+######################################################################
+TASKSCRIPT DOCUMENTATION BLOCK
+
+PURPOSE:  This jobs creates the vessle icing product.
+######################################################################
+%end
+

@@ -1,0 +1,7 @@
+#BSUB -o vesout
+#BSUB -q "dev"
+#BSUB -L /bin/sh
+#BSUB -P RTO-OPS
+#BSUB -W 0:30
+#BSUB -M 900
+./sms/sms.fake

@@ -1,0 +1,6 @@
+
+for m in EnvVars ibmpe ics w3nco w3emc bufr g2 bacio
+do
+  echo looking for $m  
+  module spider $m 
+done

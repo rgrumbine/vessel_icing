@@ -1,0 +1,148 @@
+#!/bin/sh
+
+set -xe
+export PS4=' $SECONDS + ' 
+date
+####################################
+# 
+# obtain unique process id (pid) and make temp directories
+#
+####################################
+echo "cyc is ${cyc:?}"
+echo "envir is ${envir:?}"
+echo "vessel_icing_ver is ${vessel_icing_ver:?}" #ensure version is defined
+pid=$$
+jobid=${jobid:-${job}.$pid}
+export cycle=t${cyc}z
+
+if [ "$RUN_ENVIR" = 'nco' ]; then
+  DATAROOT=${DATAROOT:-/tmpnwprd1}
+else  #dev
+  DATAROOT=${DATAROOT:-/gpfs/dell2/ptmp/wx21rg}
+fi
+
+export DATA=${DATAROOT}/$jobid
+mkdir -p $DATA
+cd $DATA 
+
+####################################
+# File To Log Msgs
+####################################
+if [ "$RUN_ENVIR" = 'nco' ]; then
+  if [ "$envir" = 'prod' ]; then
+    export jlogfile=${jlogfile:-/com/logs/jlogfiles/jlogfile.$jobid}
+  else
+    export jlogfile=/com/logs/${envir}/jlogfile
+  fi
+else  #dev
+  export jlogfile=~/jlogfile
+fi
+
+####################################
+# Determine Job Output Name on System
+####################################
+export outid="LL$job"
+export jobid="${outid}.o${pid}"
+export pgmout="OUTPUT.${pid}"
+
+####################################
+# variables that control processing
+# Determine variable settings before testing and set them accordingly
+#    SENDDBN=YES        file will be sent to OSO
+#    SENDCOM=YES        copy files from $DATA to $COMOUT
+#    SENDSMS=YES        Flag Events on SMS
+####################################
+export SENDCOM=YES
+export SENDECF=YES
+
+if [ "$envir" = "prod" ]; then
+  export SENDDBN=${SENDDBN:-YES}
+  export SENDDBN_NTC=${SENDDBN_NTC:-YES}
+else
+  export SENDDBN=${SENDDBN:-NO}
+  export SENDDBN_NTC=${SENDDBN_NTC:-NO}
+fi
+
+export GET_IOPROFILE=NO
+
+#################################################
+# Specify job's execution areas (directory paths)
+#################################################
+
+export NET=mmab
+export RUN=sice
+#Path to home directory:
+if [ "$RUN_ENVIR" != 'nco' ]; then  #dev
+  NWROOT=${NWROOT:-/u/Robert.Grumbine/rgprod}
+fi
+
+export HOMEvessel_icing=${HOMEvessel_icing:-${NWROOT}/vessel_icing.${vessel_icing_ver}}
+export EXECvessel_icing=$HOMEvessel_icing/exec
+export PARMvessel_icing=$HOMEvessel_icing/parm
+
+###################################
+# Set up the UTILITIES
+###################################
+#Requires prod_util module to be established
+export utilscript=$UTILROOT/ush
+export utilexec=$UTILROOT/exec
+export utilparm=$UTILROOT/parm # the parm file grib2_awpnhvis.232 is used
+
+## Run setup to initialize working directory and utility scripts
+#sh $utilscript/setup.sh
+
+# Run setpdy and initialize PDY variables
+sh $utilscript/setpdy.sh
+. ./PDY
+
+##############################################
+# Define COM directories
+##############################################
+if [ "$RUN_ENVIR" = 'nco' ]; then
+  com=${COMROOT:?}/${NET}/${envir}
+  export COMINgfs=/com2/gfs/prod/gfs.${PDY}
+  export COMINsst=/com/gfs/prod/sst.${PDYm1}
+  export PCOM=/pcom/${NET}
+else
+  com=/u/Robert.Grumbine/noscrub/com/${NET}/${envir}/
+  #export COMINgfs=/com2/gfs/prod/gfs.${PDY}
+  #export COMINgfs=/gpfs/hps/ptmp/emc.glopara/com2/gfs/para/gfs.${PDY}
+  export COMINgfs=${COMROOThps}/gfs/prod/gfs.${PDY}
+  #export COMINsst=/com/gfs/prod/sst.${PDYm1}
+  export COMINsst=${COMROOTp1}/gfs/prod/sst.${PDYm1}
+  export PCOM=/u/Robert.Grumbine/noscrub/pcom/${NET}/
+fi
+
+export COMOUT=$com/${RUN}.${PDY}
+
+mkdir -p $COMOUT
+
+env
+
+########################################################
+# Execute the script.
+if [ $GET_IOPROFILE = YES ]; then
+   /usrx/local/mio/tools/bin/miostats -X0 \
+   $HOMEvessel_icing/scripts/exsice.sh
+else
+   sh $HOMEvessel_icing/scripts/exsice.sh
+   export err=$?; err_chk
+fi
+########################################################
+
+if [ -e "$pgmout" ]; then
+  cat $pgmout
+fi
+
+#if [ "${KEEPDATA^^}" != YES ]; then
+#  rm -rf $DATA
+#fi
+
+##################################################
+# save the profiling data captured from miostats
+##################################################
+if [ $GET_IOPROFILE = YES ]; then
+    . /com/miostats/.set_IOprofile
+fi
+
+date

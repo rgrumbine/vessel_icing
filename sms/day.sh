@@ -19,11 +19,11 @@ module load bufr/11.2.0 bacio/2.0.2
 # Show what happened:
 module list
 
+cd /u/Robert.Grumbine/para/EMC_vessel_icing/sms
+
 export HOMEpmb=/gpfs/tp2/nco/ops/nwprod/util
-
-echo comroot $COMROOT comrot $COMROT
-
 export KEEPDATA="YES"
+echo comroot $COMROOT comrot $COMROT
 
 set -x
 

@@ -2,7 +2,7 @@
 #Robert Grumbine
 #variously through 10 September 2018
 
-set -xe
+set -e
 
 module purge
 module load prod_envir/1.0.2
@@ -25,9 +25,10 @@ echo comroot $COMROOT comrot $COMROT
 
 export KEEPDATA="YES"
 
-tagm=20190221
-tag=20190222
-while [ $tag -le 20190224 ]
+set -x
+tagm=20190310
+tag=20190311
+while [ $tag -le `date +"%Y%m%d"` ]
 do
   export PDY=$tag
   export PDYm1=$tagm

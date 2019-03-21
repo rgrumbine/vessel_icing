@@ -15,9 +15,9 @@ module list
 
 #Set up something like sms environment for calling J job
 export cyc=${cyc:-00}
-export net=mmab
+export net=omb
 export envir=fv3
-export code_ver=v5.0.5
+export code_ver=v5.0.7
 export vessel_icing_ver=$code_ver
 export job=vessel_icing
 export SMSBIN=/u/Robert.Grumbine/para/${job}.${code_ver}/sms/

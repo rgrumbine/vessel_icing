@@ -69,7 +69,7 @@ export GET_IOPROFILE=NO
 # Specify job's execution areas (directory paths)
 #################################################
 
-export NET=mmab
+export NET=omb
 export RUN=sice
 #Path to home directory:
 if [ "$RUN_ENVIR" != 'nco' ]; then  #dev

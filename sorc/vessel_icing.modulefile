@@ -1,14 +1,14 @@
 #%Module  ######################################################################
 ##                                                      Robert.Grumbine@noaa.gov 
 ##                                                      EMC/NCEP/NOAA
-##   vessel icing 5.0.5
+##   vessel icing 5.0.7
 ##_____________________________________________________
 ##
 proc ModulesHelp { } {
         puts stderr "vessel icing model modules"
 }
 module-whatis   " vessel icing model whatis description"
-set ver 5.0.5
+set ver 5.0.7
 
 module load prod_envir
 
